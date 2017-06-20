@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
+from scipy.stats import randint
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import RandomizedSearchCV
 
 def import_file():
 	columns = ['pregnancies', 'glucose', 'diastolic', 'triceps', 'insulin', 'bmi','dpf', 'age', 'diabetes']
@@ -81,6 +84,20 @@ def hyperparametertuning_gridSearchCV(clf,param_grid,X,y):
 	print("Tuned Parameters: {}".format(clf_cv.best_params_)) 
 	print("Best score is {}".format(clf_cv.best_score_))
 
+def hyperparametertuning_RandomizedSearchCV(clf, param_grid, X,y):
+
+	# Fit it to the data
+
+	clf_cv= RandomizedSearchCV(clf, param_grid, cv=5)
+	clf_cv.fit(X,y)
+
+	# Print the tuned parameters and score
+	print("Tuned Parameters: {}".format(clf_cv.best_params_))
+	print("Best score is {}".format(clf_cv.best_score_))
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -103,6 +120,7 @@ if __name__ == '__main__':
 	# classify using logistic regression
 	classifier(logreg, X,y,X_train, X_test, y_train, y_test)
 
+	# Hyperparameter tuning GridSearchCV
 	# knn params for GridSearchCV
 	knn = KNeighborsClassifier()
 	knn_params = {'n_neighbors': np.arange(1,50)}
@@ -114,6 +132,44 @@ if __name__ == '__main__':
 	c_space = np.logspace(-5, 8, 15)
 	logreg_params = {'C': c_space}
 	hyperparametertuning_gridSearchCV(logreg,logreg_params, X, y)
+
+	# Hyperparameter turning Randomized
+	# RandomizedSearchCV
+
+	# params for decision tree
+
+	print "decision tree"
+
+	# Setup the parameters and distributions to sample from: param_dist
+	param_dist = {"max_depth": [3, None],
+	              "max_features": randint(1, 9),
+	              "min_samples_leaf": randint(1, 9),
+	              "criterion": ["gini", "entropy"]}
+
+	# Instantiate a Decision Tree classifier: tree
+	tree = DecisionTreeClassifier()
+
+	hyperparametertuning_RandomizedSearchCV(tree,param_dist,X,y)
+
+	print "logisticregression"
+
+	hyperparametertuning_RandomizedSearchCV(logreg,logreg_params,X,y)
+
+	print "Knn"
+	hyperparametertuning_RandomizedSearchCV(knn,knn_params,X,y)
+
+
+	# Hold-out set in practice I: Classification
+
+	print "GridSearchCV in training"
+	logreg_params = {'C': c_space, 'penalty': ['l1', 'l2']}
+	hyperparametertuning_gridSearchCV(logreg, logreg_params, X_train,y_train)
+
+
+
+
+
+
 
 
 
