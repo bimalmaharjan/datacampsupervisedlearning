@@ -1,5 +1,5 @@
 import pandas as pd 
-import numpy as numpy
+import numpy as np 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
@@ -9,6 +9,7 @@ from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 
 def import_file():
 	columns = ['pregnancies', 'glucose', 'diastolic', 'triceps', 'insulin', 'bmi','dpf', 'age', 'diabetes']
@@ -66,6 +67,20 @@ def plot_roc_curve(fpr, tpr):
 	plt.title('ROC Curve')
 	plt.show()
 
+def hyperparametertuning_gridSearchCV(clf,param_grid,X,y):
+
+	# Instantiate the GridSearchCV object: logreg_cv
+	clf_cv = GridSearchCV(clf, param_grid, cv=5)
+
+	# Fit it to the data
+
+	clf_cv.fit(X, y)
+
+
+	# Print the tuned parameters and score
+	print("Tuned Parameters: {}".format(clf_cv.best_params_)) 
+	print("Best score is {}".format(clf_cv.best_score_))
+
 
 
 if __name__ == '__main__':
@@ -87,6 +102,19 @@ if __name__ == '__main__':
 	print "LogisticRegression"
 	# classify using logistic regression
 	classifier(logreg, X,y,X_train, X_test, y_train, y_test)
+
+	# knn params for GridSearchCV
+	knn = KNeighborsClassifier()
+	knn_params = {'n_neighbors': np.arange(1,50)}
+	hyperparametertuning_gridSearchCV(knn, knn_params, X,y)
+
+	# logistic regression params for GridSearchCV
+
+	logreg = LogisticRegression()
+	c_space = np.logspace(-5, 8, 15)
+	logreg_params = {'C': c_space}
+	hyperparametertuning_gridSearchCV(logreg,logreg_params, X, y)
+
 
 
 	
