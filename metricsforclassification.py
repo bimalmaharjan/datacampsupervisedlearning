@@ -7,6 +7,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import cross_val_score
 
 def import_file():
 	columns = ['pregnancies', 'glucose', 'diastolic', 'triceps', 'insulin', 'bmi','dpf', 'age', 'diabetes']
@@ -21,10 +23,10 @@ def get_train_test_data(df):
 
 	# Create training and test set
 	X_train, X_test, y_train, y_test = train_test_split(X,y, test_size=0.4, random_state=42)
-	return X_train, X_test, y_train, y_test
+	return X,y,X_train, X_test, y_train, y_test
 
 
-def classifier(df,clf, X_train, X_test, y_train, y_test):
+def classifier(clf, X,y,X_train, X_test, y_train, y_test):
 
 	# Fit the classifier to the training data
 	clf.fit(X_train, y_train)
@@ -46,6 +48,15 @@ def classifier(df,clf, X_train, X_test, y_train, y_test):
 
 	plot_roc_curve(fpr, tpr)
 
+	# Compute and print AUC score
+	print("AUC: {}".format(roc_auc_score(y_test, y_pred_prob)))
+
+	# Compute cross-validated AUC scores: cv_auc
+	cv_auc = cross_val_score(clf,X,y,cv=5, scoring ='roc_auc')
+
+	# Print list of AUC scores
+	print("AUC scores computed using 5-fold cross-validation: {}".format(cv_auc))
+
 
 def plot_roc_curve(fpr, tpr):
 	plt.plot([0, 1], [0, 1], 'k--')
@@ -61,7 +72,7 @@ if __name__ == '__main__':
 	df = import_file()
 
 	# split test train data
-	X_train, X_test, y_train, y_test = get_train_test_data(df)
+	X,y,X_train, X_test, y_train, y_test = get_train_test_data(df)
 
 	# instantiate KNN
 	knn = KNeighborsClassifier(n_neighbors= 6)
@@ -71,11 +82,11 @@ if __name__ == '__main__':
 
 	# classify using knn
 	print "knn"
-	classifier(df,knn, X_train, X_test, y_train, y_test)
+	classifier(knn, X,y,X_train, X_test, y_train, y_test)
 
 	print "LogisticRegression"
 	# classify using logistic regression
-	classifier(df, logreg, X_train, X_test, y_train, y_test)
+	classifier(logreg, X,y,X_train, X_test, y_train, y_test)
 
 
 	
