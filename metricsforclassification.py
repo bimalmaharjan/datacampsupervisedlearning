@@ -5,6 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_curve
+import matplotlib.pyplot as plt
 
 def import_file():
 	columns = ['pregnancies', 'glucose', 'diastolic', 'triceps', 'insulin', 'bmi','dpf', 'age', 'diabetes']
@@ -33,6 +35,26 @@ def classifier(df,clf, X_train, X_test, y_train, y_test):
 	# Generate the confusion matrix and classification report
 	print(confusion_matrix(y_test, y_pred))
 	print(classification_report(y_test, y_pred))
+
+	# Compute predicted probabilities: y_pred_prob
+	y_pred_prob = clf.predict_proba(X_test)[:,1]
+
+	# Generate ROC curve values: fpr, tpr, thresholds
+	fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
+
+	# plot roc curve
+
+	plot_roc_curve(fpr, tpr)
+
+
+def plot_roc_curve(fpr, tpr):
+	plt.plot([0, 1], [0, 1], 'k--')
+	plt.plot(fpr, tpr)
+	plt.xlabel('False Positive Rate')
+	plt.ylabel('True Positive Rate')
+	plt.title('ROC Curve')
+	plt.show()
+
 
 
 if __name__ == '__main__':
